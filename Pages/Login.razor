@@ -1,0 +1,59 @@
+@page "/login"
+@inject AuthService Auth
+@inject NavigationManager Navigation
+
+<PageTitle>Acesso Nexus</PageTitle>
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <h1 class="mb-4">Acesso Nexus</h1>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger" role="alert">@errorMessage</div>
+        }
+
+        <div class="mb-3">
+            <label for="login-email" class="form-label">E-mail institucional</label>
+            <input id="login-email" class="form-control" autocomplete="username" @bind="model.Email" @bind:event="oninput" />
+        </div>
+        <div class="mb-3">
+            <label for="login-password" class="form-label">Senha</label>
+            <input id="login-password" type="password" class="form-control" autocomplete="current-password" @bind="model.Password" @bind:event="oninput" />
+        </div>
+        <button type="button" class="btn btn-primary w-100" @onclick="HandleLogin">Entrar</button>
+
+        <p class="small text-muted mt-3 mb-0">Demonstração: <code>Arthur@nexus.edu</code> / <code>123</code> ou <code>professor@nexus.edu</code> / <code>123</code>.</p>
+    </div>
+</div>
+
+@code {
+    private readonly LoginModel model = new();
+    private string? errorMessage;
+
+    private void HandleLogin()
+    {
+        errorMessage = null;
+
+        if (string.IsNullOrWhiteSpace(model.Email) || string.IsNullOrWhiteSpace(model.Password))
+        {
+            errorMessage = "Informe e-mail e senha.";
+            return;
+        }
+
+        var user = Auth.Authenticate(model.Email.Trim(), model.Password);
+        if (user is null)
+        {
+            errorMessage = "E-mail ou senha incorretos.";
+            return;
+        }
+
+        Navigation.NavigateTo("/");
+    }
+
+    private sealed class LoginModel
+    {
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
+}
